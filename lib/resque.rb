@@ -21,11 +21,14 @@ module Resque
   extend self
 
   # Accepts a 'hostname:port' string or a Redis server.
+  # A password can be specified like so 'hostname:port:password'
   def redis=(server)
     case server
     when String
-      host, port = server.split(':')
-      redis = Redis.new(:host => host, :port => port, :thread_safe => true)
+      args = {:thread_safe => true}
+      args[:host], args[:port], password = server.split(':')
+      password && args[:password] = passwords
+      redis = Redis.new args
       @redis = Redis::Namespace.new(:resque, :redis => redis)
     when Redis
       @redis = Redis::Namespace.new(:resque, :redis => server)
